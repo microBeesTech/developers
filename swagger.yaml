@@ -1,0 +1,353 @@
+openapi: 3.0.0
+servers:
+
+  - description: microBees' server
+    url: https://dev.microbees.com/v/1_0/
+info:
+  version: "1.0.0"
+  title: Basic microBees' Developers APIs
+  description: >-
+    Welcome to the microBees Developers workspace. This workspace contains APIs collections that you can quickly demo.
+  contact:
+    url: https://developers.microbees.com
+components:
+  schemas: 
+    SmartBee:
+      type: object
+      properties:
+        id:
+          type: number
+          description: >-
+            Bee's id
+          example: 25352
+        label:
+          type: string
+          description: >-
+            Bee's label
+          example: MyLightBee
+        serial:
+          type: string
+          description: >-
+            Bee's serial
+          example: 1998875004810
+        gate_serial:
+          type: string
+          description: >-
+            Bee's gate serial
+          example: cfg153qb-d66c-4320-be39-340eff2f35c3
+        gate_id:
+          type: number
+          description: >-
+            Bee's gate id
+          example: 6644
+        lastUpdate:
+          type: number   
+          description: >-
+            Last Bee's update
+          example: 1689856504810
+        name:
+          type: string
+          description: >-
+            Bee's name
+          example: MyLightBee
+        active:
+          type: boolean
+          description: >-
+            Boolean value used to know if the bees is active or not
+        productID:
+          type: number
+          example: 31
+        prototypeName:
+          type: string
+          example: LightBee
+        rssi:
+          type: number
+          example: 150
+        lastActivation:
+          type: number
+          description: >-
+            Last Bee's activation
+          example: 1689756487162
+        icon:
+          type: string
+          example: https://products.microbees.com/wp-content/uploads/2020/10/new-foto-lightbee.png
+        configuration:
+          $ref: '#/components/schemas/Configuration'
+        sensors:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Sensor'
+        actuators:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Actuator'
+        rooms:
+          type: array
+          items:
+            type: string
+        status_string:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/Status_Object'
+              
+    Status_Object:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Ultimo Aggiornamento
+        value:
+          type: string
+          example: 14:35
+        icon:
+          type: string
+          example: av-timer
+          
+    Sensor:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 59997
+        name:
+          type: string
+          example: Absorption Sensor
+        lastUpdate:
+          type: number
+          example: 1689856505817
+        deviceID:
+          type: number
+          example: 313
+        prototypeID:
+          type: number
+          example: 198
+        Prototypename:
+          type: string
+          example: Absorption Sensor
+        device_type:
+          type: number
+          example: 0
+        dc_type:
+          type: string
+          example: Power
+        unit:
+          type: string
+          example: Wh
+        payload:
+          type: array
+          items:
+            type: number
+            minItems: 8
+            maxItems: 8
+            example:  0,
+                        0,
+                        59,
+                        250,
+                        255,
+                        0,
+                        6,
+                        150
+        value:
+          type: number
+          example: 0
+          
+    Actuator:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 25331
+        name:
+          type: string
+          example: MyLightBee
+        Prototypename:
+          type: string  
+          example: Lampadina
+        deviceID:
+          type: number
+          example: 311
+        configuration:
+          $ref: '#/components/schemas/Configuration'
+        starred:
+          type: boolean
+        uptime:
+          type: number
+          example: 19110960
+        sensorId:
+          type: number
+          example: 59896
+        payload:
+          type: array
+          items:
+            allOf:
+            - type: number
+            minItems: 8
+            maxItems: 8
+            example: 0,
+                        0,
+                        59,
+                        250,
+                        255,
+                        0,
+                        6,
+                        150
+        value:
+          type: number
+          example: 0
+        rooms:
+          type: array
+          items:
+            type: string
+          
+    Configuration:
+      type: object
+      description: >-
+        Contains several key-value pairs for device configuration description
+      properties:
+        key1:
+          type: string
+          example: bulb
+        key2:
+          type: string
+          example: 1
+        key3:
+          type: string
+          example: Color[59,250, 255,0]
+          
+    BeeResponse:        # <---- dictionary
+      type: object
+      properties:
+        status:
+          type: integer
+          enum: [0:'OK', -1:'Invalid Api Key',-2:'Invalid Credentials',-3:'Invalid Token',-4:'Invalid Email',-5:'Generic Error - See error',-6:'Non unique user']
+          example: 0
+        error:
+          type : string
+        data:
+          allOf:
+            - $ref: '#/components/schemas/SmartBee'
+            
+    SendCommandResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          enum: [0:'OK', -1:'Invalid Api Key',-2:'Invalid Credentials',-3:'Invalid Token',-4:'Invalid Email',-5:'Generic Error - See error',-6:'Non unique user']
+          example: 0
+        data:
+          type: string
+          example: Command Sent
+
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: 'https://dev.microbees.com/oauth/token'
+          scopes:
+            write: allows modifying resources
+            read: allows reading resources
+            
+
+paths:
+  /getMyBees:
+    post:
+      summary: Get the list of associated Bees
+      description: >-
+        This API return the list of the bees associated to the authenticated user.
+      security:  
+        - oauth2: [read]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Invalid Token/Unauthorized
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeeResponse'
+  /getMyBeesByIds:
+    post:
+      summary: Get a list of Bees by ids
+      description: >-
+        This API return a list of bees based on the ids list sent.
+      security:
+        - oauth2: [read]
+      requestBody: 
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  example: [25352 , 23462, 24321, 24455]
+                  items:
+                    allOf:
+                     - type: integer
+                  
+
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Invalid Token/Unauthorized
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeeResponse'
+  /sendCommand:
+    post:
+      summary: Send command to the bee
+      description: >-
+        This API return a list of bees based on the ids list sent.
+      security:
+        - oauth2: [read]
+      requestBody: 
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actuatorID:
+                  type: number
+                  example: 123
+                beeID:
+                  type: number
+                  example: 123
+                command_type:
+                  type: number
+                  example: 6
+                  description: This field is used to define the type of operation to be performed on the device, the operation to be used in your case has Id = 6
+                data:
+                  type: object
+                  properties:
+                    relay_value:
+                      type: number
+                      example: 10000
+                      description: This field can be set to 0 (turn off device), to 1 (turn on device). Or it is possible to set the field to a value > 1, this value is taken as milliseconds and after the set time interval has passed, the device turns off, for example 1000 --> Device turns off after 1 second
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Invalid Token/Unauthorized
+        '500':
+          description: Internal Server Error      
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendCommandResponse'
